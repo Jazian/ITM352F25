@@ -9,4 +9,4 @@ print("The user entered ", value_entered)
 vaule_as_integer = int(value_entered)
 
 value_squared = vaule_as_integer ** 2
-print("The value squared is ", value_squared)
+print(f"The value squared is {value_squared}")
