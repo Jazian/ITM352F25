@@ -6,7 +6,7 @@
 print("Hi There")
 value_entered = input("Please enter an integer between 1 and 100: ")
 print("The user entered ", value_entered)
-vaule_as_integer = int(value_entered)
+value_as_integer = int(value_entered)
 
-value_squared = vaule_as_integer ** 2
+value_squared = value_as_integer ** 2
 print(f"The value squared is {value_squared}")
