@@ -1,4 +1,4 @@
-# Quiz 4, Put questions and answers into a dictionary, to include other options
+# Quiz 5, Put questions and answers into a dictionary, to include other options
 # Allow user to choose correct answer by its label
 # Improve look and usability. Keept track of answers.
 # Loop until the user provides a valid answer
