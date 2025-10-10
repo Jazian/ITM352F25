@@ -1,5 +1,5 @@
-# Quiz 9, Utilizing Quiz 8 as the base file and adding the additional assignments specified by my student ID.
-# 1. Write the history of scores out to a file.  
+# Quiz 10, Utilizing Quiz 8 as the base file and adding the additional assignments specified by my student ID.
+# 1. Write the history of scores out to a file. (Done in Quiz 9)
 # 5. Allow the user to choose a category for their questions, e.g. history, art, modern politics, NBA trivia, NFL trivia, music trivia, etc. 
 # Name: Jazian Uejo
 # Date: 10/8/2025
@@ -8,7 +8,11 @@ from string import ascii_lowercase
 import random
 import json
 
-# Quiz qustions for each question list the possible answers, with the first answer being 
+# Ask the user what category of questions they wouldl like to answer
+list_of_categories = ["Pokemon", "Geography", "Celebrities"]
+category_choice = input(f"Please choose a category of questions: {list_of_categories}")
+
+# Quiz qustions for each question list the possible answers, with the first answer being the correct answer
 question_file = open('questions.json')
 QUESTIONS = json.load(question_file)
 question_file.close()
@@ -56,6 +60,7 @@ for num, (question, alternatives) in enumerate(questions, 1):
 print (f"\nYou got {num_correct} out of {len(questions)} questions correct.")
 
 # Creates a new file that holds previous scores
+# To reset the scores delete score_history.txt
 score_file = open("score_history.txt", "a")
 score_file.write(f"{num_correct} out of {len(questions)} correct\n")
 score_file.close()
