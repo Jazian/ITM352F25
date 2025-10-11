@@ -8,14 +8,19 @@ from string import ascii_lowercase
 import random
 import json
 
-# Ask the user what category of questions they wouldl like to answer
-list_of_categories = ["Pokemon", "Geography", "Celebrities"]
-category_choice = input(f"Please choose a category of questions: {list_of_categories}")
-
 # Quiz qustions for each question list the possible answers, with the first answer being the correct answer
-question_file = open('questions.json')
+question_file = open('CategoryQuestions.json', 'r')
 QUESTIONS = json.load(question_file)
 question_file.close()
+
+# Ask user to choose a category
+available_categories = list(QUESTIONS.keys())
+category_choice = input(f"Please choose a category from: {available_categories}\n> ")
+
+while category_choice not in available_categories:
+    category_choice = input(f"Please choose a category from: {available_categories}\n> ")
+    if category_choice not in available_categories:
+        print("Invalid category. Please try again.")
 
 # Prepare a list of questions
 def prepare_questions(questions, num_questions):
@@ -51,7 +56,8 @@ num_correct = 0
 NUM_QUESTIONS_PER_QUIZ = 5
 
 # Main Quiz Loop
-questions = prepare_questions(QUESTIONS, NUM_QUESTIONS_PER_QUIZ)
+# Changed questions = prepare_questions(QUESTIONS, NUM_QUESTIONS_PER_QUIZ) to include specific category choices before randomizing
+questions = prepare_questions(QUESTIONS[category_choice], NUM_QUESTIONS_PER_QUIZ)
 for num, (question, alternatives) in enumerate(questions, 1):
     print(f"\nQuestion {num}:")
     num_correct += ask_question(question, alternatives)

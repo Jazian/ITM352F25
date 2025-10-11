@@ -1,0 +1,26 @@
+{
+     "Pokemon": {
+          "Which one of these pokemon is a starter pokemon?": ["Bulbasaur", "Arceus", "Electabuzz", "Bidoof"],
+          "Which pokemon is considered a Legendary?": ["Palkia", "Hydreigon", "Torterra", "Aegislash"],
+          "Which pokemon is part of the 'Eeveelutions'?": ["Umbreon", "Deoxys", "Yveltal", "Xerneas"],
+          "What pokemon trainer has Garchomp as their main pokemon?": ["Cynthia", "Giovanni", "Ash Ketchum", "Blue"],
+          "In what region was Pikachu first introduced in?": ["Kanto", "Johto", "Hoenn", "Alola"],
+          "Which of these pokemon are a Ghost type?": ["Gengar", "Clefairy", "Charizard", "Rattata"]
+     },
+     "One Piece": {
+          "Who holds the highest bounty in the series (Dead or Alive)?": ["Gol D. Roger", "Whitebeard", "Shanks", "Kaido"],
+          "What did Luffy recieve from Shanks that became iconic to his character?": ["Straw Hat", "3 Swords", "Black Leg Style", "Weather Baton"],
+          "What devil fruit does luffy at as a child?": ["Gum-Gum", "Barrier-Barrier", "Chop-Chop", "Mochi-Mochi"],
+          "How many warlords of the sea are there in total?": ["7", "6", "8", "10"],
+          "Who is considered the 'stronget swordsman'?": ["Dracule Mihawk", "Roronoa Zoro", "Shimotsuki Ryuma", "Shanks"],
+          "How many sword/swords does the character 'Roronoa Zoro' weild?": ["3", "1", "2", "None"]
+     },
+     "Animals": {
+          "What is the world's largest land carnivore?": ["Polar Bear", "Brown Bear", "Grizzly Bear", "Black Bear"],
+          "What is the fastest land mammal?": ["Cheetah", "Horse", "Panther", "Jaguar"],
+          "What is the largest rodent in the world?": ["Capybara", "Beavers", "Rats", "Porcupines"],
+          "What mammal has the strongest bite force?": ["Hippopotamus", "Elephant", "Lion", "Bengal Tiger"],
+          "What animal only comes down from its tree once a week to go to the bathroom?": ["Sloth", "Koala", "Possum", "Squirrel"],
+          "What animal looks like a burglar?": ["Raccoon", "Tanuki", "Badger", "Lemurs"]
+     }
+}
