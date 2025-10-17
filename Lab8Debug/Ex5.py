@@ -1,7 +1,7 @@
 def fibonacci(list):
-    Fibo = list[0, 1]
+    Fibo = [0, 1]
     for val in list:
-        Fibo = Fibo.append(Fibo[-1] + val)
+        Fibo.append(Fibo[-1] + Fibo[-2])
     return Fibo
 
 my_list = [1, 2, 3, 4, 5]
