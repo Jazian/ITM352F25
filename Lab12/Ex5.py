@@ -1,9 +1,9 @@
 # Get a JSON file from the city of Chicago's data portal and analyze driver types.
-# Make use of the SQL like queary capabilities of the portal.
+# Make use of the SQL like query capabilities of the portal.
 import pandas as pd
 import requests
 
-# Create a REST queary that returns the count of driver licenses by type
+# Create a REST query that returns the count of driver licenses by type
 search_results = requests.get("https://data.cityofchicago.org/resource/97wa-y6ff.json?$select=driver_type,count(license)&$group=driver_type")
 results_json = search_results.json()
 
