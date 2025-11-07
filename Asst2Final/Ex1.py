@@ -1,0 +1,230 @@
+# Read in a CSV file and create a dataframe.  Print some info.
+# Pivot the dataframe to show total sales by order type.
+# Calculate total sales per order.  Show average sales by state
+# and sales type.
+
+# Requirement 1: For each result, ask the user if they want the results exported to an Excel file (that can be read directly into Excel). 
+    # Ask the user what filename they want.
+
+import pandas as pd
+import numpy as np
+import pyarrow 
+import ssl
+import time
+
+# Temporary fix.  Don't do this in production code.
+ssl._create_default_https_context = ssl._create_unverified_context
+pd.set_option('display.max_columns', None)
+pd.set_option('display.float_format', '{:.2f}'.format)
+
+
+def load_csv(file_path):
+    print(f"Reading CSV file from {file_path}...")
+    start_time = time.time()
+    
+    try:
+
+        df = pd.read_csv(file_path, engine="pyarrow")
+        end_time = time.time()
+        load_time = end_time - start_time
+        print(f"CSV file loaded successfully in {load_time:.2f} seconds.")
+        print(f"Number of rows: {len(df)}")
+        print(f"Columns: {df.columns.tolist()}")
+
+        df['order_date'] = pd.to_datetime(df['order_date'], format='%m/%d/%y', errors='coerce')
+        df.fillna(0, inplace=True)
+
+        df['sales'] = df['quantity'] * df['unit_price']
+        required_columns = ['quantity', 'unit_price', 'order_date']
+        # Check that the required columns are in df
+        missing_columns = [col for col in required_columns if col not in df.columns]
+        if missing_columns:
+            print(f"Warning: Missing required columns: {missing_columns}")
+        else:
+            print("All required columns are present.")
+        return df
+
+    except FileNotFoundError as e:
+        print(f"Error: The file {file_path} was not found. {e}")
+
+    except pd.errors.EmptyDataError as e:
+        print(f"Error: The file {file_path} is empty. {e}")
+        return None
+    
+    except pd.errors.ParserError as e:
+        print(f"Error: There was a parsing error while reading {file_path}. {e}")
+        return None
+    
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        return None
+    
+def display_rows(dataframe):
+    while True:
+        print("\nEnter the number of rows to display")
+        print(f" - Enter a number 1 to {len(dataframe)}")  
+        print(" - To see all rows, enter 'all'")
+        print(" - To skip preview, press Enter")
+        user_input = input("Your choice: ").strip().lower()
+
+        if user_input == '':
+            print("Skipping preview.")
+            break
+        elif user_input == 'all':
+            print("Displaying all rows:")
+            print(dataframe)
+            break
+        elif user_input.isdigit() and 1 <= int(user_input) < len(dataframe):
+            num_rows = int(user_input)
+            print(f"Displaying the first {num_rows} rows:")
+            print(dataframe.head(num_rows))
+            break
+        else:
+            print("Invalid input. Please try again.")
+
+def exit_program(sales_data):
+    print("Exiting the program. Goodbye!")
+    exit(0)
+
+# Create a function that can be referenced to export any dataframe to CSV
+def prompt_export_to_csv(df, default_name="output"):
+    choice = input("\nWould you like to export this result to a CSV file? (y/n): ").strip().lower()
+    if choice == 'y':
+        filename = input("Enter the filename (without extension): ").strip()
+        if not filename:
+            filename = default_name
+        try:
+            df.to_csv(f"{filename}.csv", index=True)
+            print(f"Exported to {filename}.csv")
+        except Exception as e:
+            print(f"Failed to export: {e}")
+
+def show_employees_by_region(sales_data):
+    pivot_table = pd.pivot_table(sales_data, index='sales_region', values='employee_id', aggfunc=pd.Series.nunique)
+    pivot_table.columns = ['Number of Employees']  # Rename the colummn for readability
+    print("\nNumber of Employees by Region:")
+    print(pivot_table)
+    prompt_export_to_csv(pivot_table, "employees_by_region")
+    return pivot_table
+
+
+def total_sales_by_order_type(sales_data):
+    pivot_table = pd.pivot_table(sales_data, index='order_type', values='sales', aggfunc='sum')
+    print("\nTotal Sales by Order Type:")
+    print(pivot_table)
+    prompt_export_to_csv(pivot_table, "sales_by_order_type")
+    return pivot_table
+
+def total_sales_per_order(sales_data):
+    pivot_table = pd.pivot_table(sales_data, index='order_number', values='sales', aggfunc='sum')
+    print("\nTotal Sales per Order:")
+    print(pivot_table)
+    prompt_export_to_csv(pivot_table, "total_sales_per_order")
+    return pivot_table
+
+def average_sales_by_state_and_type(sales_data):
+    pivot_table = pd.pivot_table(sales_data, index='customer_state', columns='order_type', values='sales', aggfunc='mean')
+    print("\nAverage Sales by State and Sales Type:")
+    print(pivot_table)
+    prompt_export_to_csv(pivot_table, "average_sales_by_state_and_type")
+    return pivot_table
+
+def get_user_selection(options, prompt): 
+    print(prompt) 
+    for i, option in enumerate(options):
+        print(f"{i+1}. {option}") 
+    choice = input("Enter the number(s) of your choice(s), separated by commas: ") 
+    
+    # Validate input
+    try:
+        indices = [int(i.strip()) for i in choice.split(',') if i.strip()]
+        if any(idx < 1 or idx > len(options) for idx in indices):
+            print("One or more selections are out of range.")
+            return []
+        return [options[idx - 1] for idx in indices]
+    except ValueError:
+        print("Invalid input. Please enter only numbers separated by commas.")
+        return []
+
+
+# Create a function to generate a custom pivot table
+def generate_custom_pivot_table(data):
+    print("\nGenerating Custom Pivot Table...")
+
+    row_options = list(data.columns)
+    rows = get_user_selection(row_options, "Select row(s) for the pivot table (required):")
+    if not rows:
+        print("Invalid row selection. Please choose valid row indices from the list.")
+        return
+
+    col_options = [col for col in row_options if col not in rows]
+    cols = get_user_selection(col_options, "Select column(s) for the pivot table (optional):")
+    if cols == [] and col_options and input("No valid columns selected. Continue without columns? (y/n): ").strip().lower() != 'y':
+        print("Pivot table generation cancelled.")
+        return
+
+    value_options = list(data.select_dtypes(include=['number']).columns)
+    values = get_user_selection(value_options, "Select value(s) to aggregate (required):")
+    if not values:
+        print("Invalid value selection. Please choose valid numeric fields.")
+        return
+
+    agg_options = ['sum', 'mean', 'count']
+    agg_func = get_user_selection(agg_options, "Select aggregation function (required):")
+    if not agg_func:
+        print("Invalid aggregation function. Please choose one from the list.")
+        return
+
+    try:
+        pivot_table = pd.pivot_table(
+            data,
+            index=rows,
+            columns=cols if cols else None,
+            values=values,
+            aggfunc=agg_func[0]
+        )
+        print("\nCustom Pivot Table:")
+        print(pivot_table)
+        prompt_export_to_csv(pivot_table, "custom_pivot_table")
+    except Exception as e:
+        print(f"Error generating pivot table: {e}")
+
+def display_menu(sales_data):
+    menu_options = (
+        ("Show the first n rows of sales data", display_rows),
+        ("Show the number of employees by region", show_employees_by_region),
+        ("Show total sales by order type", total_sales_by_order_type),
+        ("Show total sales per order", total_sales_per_order),
+        ("Show average sales by state and sales type", average_sales_by_state_and_type),
+        ("Create a custome Pivot Table", generate_custom_pivot_table),
+        ("Exit the program", exit_program)
+    )
+
+    print("\nAvailable Options:")
+    for i, (description, _) in enumerate(menu_options, start=1):
+        print(f"{i}. {description}")
+
+    try:
+        menu_len = len(menu_options)
+        choice = int(input("Select an option (1 to {}): ".format(menu_len)))
+        if 1 <= choice <= menu_len:
+            action = menu_options[choice - 1][1]
+            action(sales_data)
+        else:
+            print("Invalid choice. Please select a valid option.")
+    except ValueError:
+        print("Invalid input. Please enter a valid number.")    
+
+url = "https://drive.google.com/uc?id=1ujY0WCcePdotG2xdbLyeECFW9lCJ4t-K"
+sales_data = load_csv(url)
+
+
+def main():
+    # Main program loop
+    while True:
+        display_menu(sales_data)
+
+
+if __name__ == "__main__":
+    main()
+         
