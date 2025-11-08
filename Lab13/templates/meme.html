@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <title>Memes'R'Us</title>
+   <meta charset="UTF-8" name="viewport" content="width=device-width, initial-scale=0.8">
+   <meta http-equiv="refresh" content="10; url=http://127.0.0.1:5000/meme" />
+</head>
+<body>
+    <h1>Memes'R'Us</h1>
+    {% if meme_url %}
+        <img src="{{ meme_url }}" alt="Wholesome Meme">
+        <div class="caption">{{ title }}</div>
+        <div class="source">Source: r/{{ subreddit }}</div>
+    {% else %}
+        <p>Oops! Couldn't load a meme right now. Try again soon.</p>
+    {% endif %}
+</body>
+</html>

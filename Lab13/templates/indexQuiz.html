@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head><title>Choose Category</title></head>
+<body>
+    <h1>Welcome to the Quiz!</h1>
+    <form method="post">
+        <label>Select a category:</label>
+        <select name="category">
+            {% for cat in categories %}
+                <option value="{{ cat }}">{{ cat }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit">Start Quiz</button>
+    </form>
+</body>
+</html>
