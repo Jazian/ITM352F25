@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Welcome to the quiz</title>
+    </head>
+    <body>
+        {% if returning %}
+  <h1>Welcome back, {{ username }}!</h1>
+  <h2>Your Score History:</h2>
+  <ul>
+    {% for entry in history %}
+      <li>{{ entry.score }}/{{ entry.total }}</li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <h2>Welcome to the Quiz Game!</h2>
+{% endif %}
+<a href="{{ url_for('quiz') }}">Start Quiz</a>
+
+    </body>
+</html>

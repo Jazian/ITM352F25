@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Quiz</title>
+</head>
+    <body>
+        <h1>Question {{num}}</h1>
+        <h2>{{ question }}</h2>
+        <form method="POST">
+            {% for option in options %}
+                <input type="radio" name="answer" value="{{ option }}"> {{ option }}<br>
+            {% endfor %}
+            <br>
+            <input type="submit" value="Submit Answer">
+        </form>
+        <form method="POST">
+            <input type="hidden" name="hint" value="true">
+            <input type="submit" value="Get Hint" {% if hint_used %}disabled{% endif %}>
+        </form>
+        {% if hint %}
+            <p><strong>Hint:</strong> {{ hint }}</p>
+        {% endif %}
+    </body>
+</html>

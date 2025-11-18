@@ -1,0 +1,32 @@
+{
+  "What is the airspeed of an unladen swallow in miles/hr": {
+    "answer": "12",
+    "choices": ["12", "8", "11", "15"],
+    "hint": "It's a Monty Python reference — think absurd but specific."
+  },
+  "What is the capital of Texas": {
+    "answer": "Austin",
+    "choices": ["Austin", "San Antonio", "Dallas", "Waco"],
+    "hint": "It's known for live music and tech startups."
+  },
+  "The Last Supper was painted by which artist": {
+    "answer": "Da Vinci",
+    "choices": ["Da Vinci", "Rembrandt", "Picasso", "Michelangelo"],
+    "hint": "He also designed flying machines."
+  },
+  "Which classic novel opens with the line 'Call Me Ishmael'?": {
+    "answer": "Moby Dick",
+    "choices": ["Moby Dick", "Wuthering Heights", "The Old Man and the Sea", "The Scarlet Letter"],
+    "hint": "It's about a whale."
+  },
+  "Frank Lloyd Wright designed a house that included a waterfall. What is the name of this house?": {
+    "answer": "Fallingwater",
+    "choices": ["Fallingwater", "Watering Heights", "Mossyledge", "Taliesin"],
+    "hint": "The name literally describes the feature."
+  },
+  "Who Invented the light bulb?": {
+    "answer": "Thomas Edison",
+    "choices": ["Thomas Edison", "Nikola Tesla", "Alexander Graham Bell", "George Westinghouse"],
+    "hint": "He's famous for inventing many things — and for patents."
+  }
+}
