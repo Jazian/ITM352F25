@@ -1,0 +1,12 @@
+<DOCTYPE html>
+<html lang="en">
+{% extends "layout.html" %}
+{% block content %}
+<h2>Welcome to Casino Royale 🎰</h2>
+<p>Select a game to play:</p>
+<ul>
+    <li><a href="{{ url_for('blackjack') }}">Blackjack</a></li>
+</ul>
+{% endblock %}
+
+</html>

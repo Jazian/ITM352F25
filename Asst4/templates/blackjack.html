@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% extends "layout.html" %}
+{% block content %}
+<h2>Blackjack 🃏</h2>
+
+<p><strong>Dealer's Hand:</strong> {{ dealer_hand }} (Score: {{ dealer_score }})</p>
+<p><strong>Your Hand:</strong> {{ player_hand }} (Score: {{ player_score }})</p>
+
+{% if result %}
+    <h3>{{ result }}</h3>
+    <a href="{{ url_for('reset') }}">Play Again</a>
+{% else %}
+    <form method="POST">
+        <button type="submit" name="action" value="hit">Hit</button>
+        <button type="submit" name="action" value="stand">Stand</button>
+    </form>
+{% endif %}
+{% endblock %}
