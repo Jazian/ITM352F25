@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="150" height="200" viewBox="0 0 300 450">
+  <!-- Card background -->
+  <rect x="10" y="10" width="280" height="430" rx="20" fill="#118a3c" stroke="#1da64b" stroke-width="12"/>
+  <rect x="26" y="26" width="248" height="398" rx="16" fill="none" stroke="#ffffff" stroke-width="4"/>
+
+  <!-- Taller royal crown -->
+  <g transform="translate(150,225)">
+    <!-- Base band -->
+    <rect x="-70" y="50" width="140" height="20" rx="10" fill="#f7c600"/>
+
+    <!-- Crown points (taller) -->
+    <polygon points="-60,50 -40,-20 -20,50" fill="#f7c600"/>
+    <polygon points="-20,50 0,-70 20,50" fill="#f7c600"/>
+    <polygon points="20,50 40,-20 60,50" fill="#f7c600"/>
+
+    <!-- Orbs -->
+    <circle cx="-40" cy="-20" r="8" fill="#f7c600"/>
+    <circle cx="0" cy="-70" r="8" fill="#f7c600"/>
+    <circle cx="40" cy="-20" r="8" fill="#f7c600"/>
+  </g>
+</svg>
+
+

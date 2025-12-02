@@ -1,20 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
-
 {% extends "layout.html" %}
 {% block content %}
 <h2>Blackjack 🃏</h2>
 
-<p><strong>Dealer's Hand:</strong> {{ dealer_hand }} (Score: {{ dealer_score }})</p>
-<p><strong>Your Hand:</strong> {{ player_hand }} (Score: {{ player_score }})</p>
+{% if chips <= 0 and bet == 0 %}
+    <h3>You're out of chips! Game over.</h3>
+    <a href="{{ url_for('reset') }}">Restart with 1000 chips</a>
+{% endif %}
+
+<div>
+    <strong>Chips:</strong> {{ chips }}<br>
+    {% if bet == 0 and not result %}
+        <form method="POST">
+            <label>Place your bet:</label>
+            <input type="number" name="bet" min="1" max="{{ chips }}" required>
+            <button type="submit" name="action" value="bet">Bet</button>
+        </form>
+    {% endif %}
+</div>
+
+{% if bet > 0 or result %}
+    <div>
+        <strong>Dealer's Hand:</strong>
+        {% if not hide_dealer %}
+            (Score: {{ dealer_score }})
+        {% endif %}
+        <br>
+        {% for card in dealer_hand %}
+            {% if loop.index == 2 and hide_dealer %}
+                <img src="{{ url_for('static', filename='cards/back.svg') }}" alt="Hidden card" width="100">
+            {% else %}
+                <img src="{{ url_for('static', filename='cards/' ~ card[2]) }}" alt="{{ card[0] }} of {{ card[1] }}" width="100">
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <div>
+        <strong>Your Hand:</strong> (Score: {{ player_score }})<br>
+        {% for card in player_hand %}
+            <img src="{{ url_for('static', filename='cards/' ~ card[2]) }}" alt="{{ card[0] }} of {{ card[1] }}" width="100">
+        {% endfor %}
+    </div>
+{% endif %}
 
 {% if result %}
     <h3>{{ result }}</h3>
-    <a href="{{ url_for('reset') }}">Play Again</a>
-{% else %}
+    {% if chips > 0 %}
+        <a href="{{ url_for('reset') }}">Play Again</a>
+    {% endif %}
+{% elif bet > 0 %}
     <form method="POST">
         <button type="submit" name="action" value="hit">Hit</button>
         <button type="submit" name="action" value="stand">Stand</button>
     </form>
 {% endif %}
 {% endblock %}
+</html>
