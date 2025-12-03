@@ -1,12 +1,88 @@
-<DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 {% extends "layout.html" %}
 {% block content %}
-<h2>Welcome to Uejo Casino</h2>
+<style>
+    body {
+        background-color: #FFDAB9; /* Peach background */
+        font-family: 'Trebuchet MS', Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    header {
+        background: linear-gradient(90deg, #ffb07c, #ff7f50);
+        color: white;
+        text-align: center;
+        padding: 20px;
+        font-size: 28px;
+        font-weight: bold;
+        letter-spacing: 2px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    }
+    h2 {
+        text-align: center;
+        color: #333;
+        margin-top: 40px;
+    }
+    p {
+        text-align: center;
+        font-size: 18px;
+        color: #555;
+    }
+    ul {
+        list-style: none;
+        padding: 0;
+        text-align: center;
+        margin-top: 20px;
+    }
+    ul li {
+        display: inline-block;
+        margin: 10px;
+    }
+    ul li a {
+        text-decoration: none;
+        background-color: #fff;
+        color: #333;
+        padding: 12px 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    ul li a:hover {
+        background-color: #ff7f50;
+        color: white;
+    }
+    footer {
+        background: linear-gradient(90deg, #ff7f50, #ffb07c);
+        color: white;
+        text-align: center;
+        padding: 15px;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        font-size: 20px;
+        box-shadow: 0 -4px 6px rgba(0,0,0,0.2);
+    }
+    /* Decorative casino icons */
+    .casino-icons {
+        font-size: 20px;
+        margin-top: 10px;
+    }
+</style>
+
+<header>
+     Welcome to Uejo Casino
+    <div class="casino-icons">♠ ♥ ♦ ♣</div>
+</header>
+
+<h2>Choose Your Game</h2>
 <p>Select a game to play:</p>
 <ul>
     <li><a href="{{ url_for('blackjack') }}">Blackjack</a></li>
 </ul>
-{% endblock %}
 
+<footer>
+    Good luck getting out of debt!
+</footer>
+{% endblock %}
 </html>
