@@ -2,8 +2,10 @@
 # Ex2. Add images of the cards being played on the blackjack page instead of just text representation.
 # Ex3. Add Chips and Betting System.
 # Ex3. If the player runs out of chips, display a game over message and provide an option to restart with a default amount of chips.
-# Ex4. Have cards limited to a standard 52-card deck, reshuffling when the deck is exhausted.
-# Ex4. Add a cheat button that allows the player to see cards that have been used in the deck so far.
+# Ex4. Dealer behavior (dealer must hit until reaching a score of 17 or higher).
+# Ex4. Handle the split option for pairs in blackjack.
+# Ex5. Have cards limited to a standard 52-card deck, reshuffling when the deck is exhausted.
+# Ex5. Add a cheat button that allows the player to see cards that have been used in the deck so far reset upon deck reshuffle.
 
 from flask import Flask, render_template, redirect, url_for, request, session
 import random
