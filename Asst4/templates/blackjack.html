@@ -2,58 +2,220 @@
 <html lang="en">
 {% extends "layout.html" %}
 {% block content %}
-<h2>Blackjack 🃏</h2>
+<style>
+  body {
+    background-color: #FFDAB9;
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  header {
+    background: linear-gradient(90deg, #ffb07c, #ff7f50);
+    color: white;
+    text-align: center;
+    padding: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  }
+  h2 {
+    text-align: center;
+    color: #333;
+    margin-top: 24px;
+  }
+  .table-area {
+    max-width: 980px;
+    margin: 18px auto;
+    background: rgba(255,255,255,0.95);
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+  }
+  .status {
+    text-align: center;
+    color: #444;
+    margin-bottom: 12px;
+    font-size: 18px;
+  }
+  .hands {
+    display: flex;
+    gap: 18px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .hand {
+    background: #fff;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    min-width: 220px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+  }
+  .hand strong { display:block; margin-bottom:8px; color:#333; }
+  .controls {
+    text-align: center;
+    margin-top: 14px;
+  }
+  .controls form { display:inline-block; margin:6px; }
+  .controls button {
+    background: #ff7f50;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.12);
+  }
+  .controls button.secondary {
+    background: #fff;
+    color: #333;
+    border: 1px solid #eee;
+  }
+  .messages { text-align:center; color:#555; margin-top:12px; }
+  .used-cards {
+    max-width: 980px;
+    margin: 12px auto;
+    background: rgba(255,255,255,0.95);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+  }
+  footer {
+    background: linear-gradient(90deg, #ff7f50, #ffb07c);
+    color: white;
+    text-align: center;
+    padding: 15px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    font-size: 20px;
+    box-shadow: 0 -4px 6px rgba(0,0,0,0.2);
+  }
+  @media (max-width:700px) {
+    .hand { min-width: 160px; }
+    .controls button { padding: 8px 10px; font-size:14px; }
+  }
+</style>
 
-{% if chips <= 0 and bet == 0 %}
-    <h3>You're out of chips! Game over.</h3>
-    <a href="{{ url_for('reset') }}">Restart with 1000 chips</a>
-{% endif %}
+<header>
+  Welcome to Uejo Casino
+  <div class="casino-icons">♠ ♥ ♦ ♣</div>
+</header>
 
-<div>
-    <strong>Chips:</strong> {{ chips }}<br>
-    {% if bet == 0 and not result %}
-        <form method="POST">
-            <label>Place your bet:</label>
-            <input type="number" name="bet" min="1" max="{{ chips }}" required>
-            <button type="submit" name="action" value="bet">Bet</button>
-        </form>
+<h2>Blackjack</h2>
+
+<div class="table-area">
+  <div class="status">
+    <strong>Chips:</strong> {{ chips }}
+    {% if bet > 0 %} &nbsp; | &nbsp; <strong>Current Bet:</strong> {{ bet }} {% endif %}
+  </div>
+
+  {% if chips <= 0 and bet == 0 %}
+    <div class="messages">
+      <h3>You're out of chips! Game over.</h3>
+      <a href="{{ url_for('reset') }}" class="controls-link">Restart with 1000 chips</a>
+    </div>
+  {% endif %}
+
+  {% if bet == 0 and not result %}
+    <div style="text-align:center; margin-bottom:12px;">
+      <form method="POST" style="display:inline-block;">
+        <label style="margin-right:8px;">Place your bet:</label>
+        <input type="number" name="bet" min="1" max="{{ chips }}" required style="padding:8px; border-radius:6px; border:1px solid #ddd;">
+        <button type="submit" name="action" value="bet">Bet</button>
+      </form>
+    </div>
+  {% endif %}
+
+  {% if bet > 0 or result %}
+    <div class="hands">
+      <div class="hand">
+        <strong>Dealer's Hand {% if not hide_dealer %}(Score: {{ dealer_score }}){% endif %}</strong>
+        <div>
+          {% for card in dealer_hand %}
+            {% if loop.index == 2 and hide_dealer %}
+              <img src="{{ url_for('static', filename='cards/back.svg') }}" alt="Hidden card" width="100">
+            {% else %}
+              <img src="{{ url_for('static', filename='cards/' ~ card[2]) }}" alt="{{ card[0] }} of {{ card[1] }}" width="100">
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="hand">
+        <strong>Your Hand {% if player_hand %}(Score: {{ player_score }}){% endif %}</strong>
+        <div>
+          {% for card in player_hand %}
+            <img src="{{ url_for('static', filename='cards/' ~ card[2]) }}" alt="{{ card[0] }} of {{ card[1] }}" width="100">
+          {% endfor %}
+        </div>
+      </div>
+
+      {% if split %}
+        <div class="hand">
+          <strong>Split Hand {% if split_hand %}(Score: {{ split_score }}){% endif %}</strong>
+          <div>
+            {% for card in split_hand %}
+              <img src="{{ url_for('static', filename='cards/' ~ card[2]) }}" alt="{{ card[0] }} of {{ card[1] }}" width="100">
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% if show_used %}
+    <div class="used-cards">
+      <strong>Used Cards (since last reshuffle)</strong>
+      <div style="margin-top:8px;">
+        {% if used_cards %}
+          {% for card in used_cards %}
+            <img src="{{ url_for('static', filename='cards/' ~ card[2]) }}" alt="{{ card[0] }} of {{ card[1] }}" width="48" style="margin:4px;">
+          {% endfor %}
+        {% else %}
+          <div>No cards used yet.</div>
+        {% endif %}
+      </div>
+    </div>
+  {% endif %}
+
+  {% if messages %}
+    <div class="messages">
+      {% for m in messages %}
+        <p>{{ m }}</p>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  <div class="controls">
+    {% if result %}
+      <h3>{{ result }}</h3>
+      {% if chips > 0 %}
+        <a href="{{ url_for('reset') }}"><button class="secondary">Play Again</button></a>
+      {% endif %}
+    {% elif bet > 0 %}
+      {% if not round_over %}
+        <form method="POST"><button type="submit" name="action" value="hit">Hit</button></form>
+        <form method="POST"><button type="submit" name="action" value="stand">Stand</button></form>
+      {% endif %}
+
+      <form method="POST" style="margin-left:6px;">
+        <button type="submit" name="action" value="cheat" class="secondary">
+          {% if show_used %}Hide Used Cards{% else %}Cheat: Show Used Cards{% endif %}
+        </button>
+      </form>
+
+      {% if not split and player_hand|length == 2 and player_hand[0][0] == player_hand[1][0] and chips >= bet and current_hand == 'player' %}
+        <form method="POST"><button type="submit" name="action" value="split">Split</button></form>
+      {% endif %}
     {% endif %}
+  </div>
 </div>
 
-{% if bet > 0 or result %}
-    <div>
-        <strong>Dealer's Hand:</strong>
-        {% if not hide_dealer %}
-            (Score: {{ dealer_score }})
-        {% endif %}
-        <br>
-        {% for card in dealer_hand %}
-            {% if loop.index == 2 and hide_dealer %}
-                <img src="{{ url_for('static', filename='cards/back.svg') }}" alt="Hidden card" width="100">
-            {% else %}
-                <img src="{{ url_for('static', filename='cards/' ~ card[2]) }}" alt="{{ card[0] }} of {{ card[1] }}" width="100">
-            {% endif %}
-        {% endfor %}
-    </div>
-
-    <div>
-        <strong>Your Hand:</strong> (Score: {{ player_score }})<br>
-        {% for card in player_hand %}
-            <img src="{{ url_for('static', filename='cards/' ~ card[2]) }}" alt="{{ card[0] }} of {{ card[1] }}" width="100">
-        {% endfor %}
-    </div>
-{% endif %}
-
-{% if result %}
-    <h3>{{ result }}</h3>
-    {% if chips > 0 %}
-        <a href="{{ url_for('reset') }}">Play Again</a>
-    {% endif %}
-{% elif bet > 0 %}
-    <form method="POST">
-        <button type="submit" name="action" value="hit">Hit</button>
-        <button type="submit" name="action" value="stand">Stand</button>
-    </form>
-{% endif %}
+<footer>
+  Good luck getting out of debt!
+</footer>
 {% endblock %}
 </html>

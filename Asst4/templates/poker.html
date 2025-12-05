@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+{% extends "layout.html" %}
+{% block content %}
+<style>
+  /* reuse your blackjack styles or keep minimal */
+  .table-area { max-width:980px; margin:18px auto; background:#fff; padding:16px; border-radius:8px; }
+  .hand { text-align:center; margin-bottom:12px; }
+  .controls form { display:inline-block; margin:6px; }
+  .card-checkbox { display:inline-block; margin:6px; }
+</style>
+
+<header>
+  Welcome to Uejo Casino
+  <div class="casino-icons">♠ ♥ ♦ ♣</div>
+</header>
+
+<div class="table-area">
+  <h2>Five Card Draw Poker</h2>
+
+  <div><strong>Chips:</strong> {{ chips }}</div>
+
+  {% if messages %}
+    <div>
+      {% for m in messages %}<p>{{ m }}</p>{% endfor %}
+    </div>
+  {% endif %}
+
+  {% set phase = poker.phase %}
+
+  {% if phase == 'bet' %}
+    <form method="POST">
+      <label>Place your bet:</label>
+      <input type="number" name="bet" min="1" max="{{ chips }}" required>
+      <button type="submit" name="action" value="bet">Deal</button>
+    </form>
+  {% else %}
+    <div class="hand">
+      <strong>Your Hand</strong>
+      <div>
+        {% for card in poker.player_hand %}
+          <img src="{{ url_for('static', filename='cards/' ~ card[2]) }}" width="80" alt="{{ card[0] }} of {{ card[1] }}">
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="hand">
+      <strong>Dealer Hand</strong>
+      <div>
+        {% if phase == 'draw' %}
+          {% for card in poker.dealer_hand %}
+            <img src="{{ url_for('static', filename='cards/back.svg') }}" width="80">
+          {% endfor %}
+        {% else %}
+          {% for card in poker.dealer_hand %}
+            <img src="{{ url_for('static', filename='cards/' ~ card[2]) }}" width="80">
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+
+    {% if phase == 'draw' %}
+      <form method="POST">
+        <div>Select cards to discard</div>
+        <div>
+          {% for i in range(0,5) %}
+            <label class="card-checkbox">
+              <input type="checkbox" name="discard" value="{{ i }}"> discard
+            </label>
+          {% endfor %}
+        </div>
+        <button type="submit" name="action" value="draw">Draw</button>
+        <button type="submit" name="action" value="fold">Fold</button>
+      </form>
+    {% elif phase == 'showdown' %}
+      <form method="POST">
+        <button type="submit" name="action" value="showdown">Showdown</button>
+        <button type="submit" name="action" value="fold">Fold</button>
+      </form>
+    {% elif phase == 'round_over' %}
+      <div><strong>Result:</strong> {{ poker.result }}</div>
+      <form method="POST">
+        <button type="submit" name="action" value="reset_poker">Play Again</button>
+      </form>
+    {% endif %}
+  {% endif %}
+
+  {% if show_used %}
+    <div style="margin-top:12px;">
+      <strong>Used Cards</strong>
+      <div>
+        {% for card in used_cards %}
+          <img src="{{ url_for('static', filename='cards/' ~ card[2]) }}" width="48" style="margin:4px;">
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<footer>Good luck getting out of debt!</footer>
+{% endblock %}
+</html>

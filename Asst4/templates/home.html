@@ -52,6 +52,10 @@
         background-color: #ff7f50;
         color: white;
     }
+    .reset-links {
+        text-align: center;
+        margin-top: 18px;
+    }
     footer {
         background: linear-gradient(90deg, #ff7f50, #ffb07c);
         color: white;
@@ -79,7 +83,12 @@
 <p>Select a game to play:</p>
 <ul>
     <li><a href="{{ url_for('blackjack') }}">Blackjack</a></li>
+    <li><a href="{{ url_for('poker') }}">Poker</a></li>
 </ul>
+
+<div class="reset-links">
+  <a href="{{ url_for('reset') }}" class="reset-link">Reset (clears both games)</a>
+</div>
 
 <footer>
     Good luck getting out of debt!
