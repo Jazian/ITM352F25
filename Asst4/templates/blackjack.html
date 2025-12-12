@@ -115,7 +115,7 @@
   {% if chips <= 0 and bet == 0 %}
     <div class="messages">
       <h3>You're out of chips! Game over.</h3>
-      <a href="{{ url_for('reset') }}" class="controls-link">Restart with 1000 chips</a>
+      <a href="{{ url_for('reset_game', game='blackjack') }}" class="controls-link">Restart with 1000 chips</a>
     </div>
   {% endif %}
 
@@ -193,7 +193,7 @@
     {% if result %}
       <h3>{{ result }}</h3>
       {% if chips > 0 %}
-        <a href="{{ url_for('reset') }}"><button class="secondary">Play Again</button></a>
+        <a href="{{ url_for('reset_game', game='blackjack') }}"><button class="secondary">Play Again</button></a>
       {% endif %}
     {% elif bet > 0 %}
       {% if not round_over %}

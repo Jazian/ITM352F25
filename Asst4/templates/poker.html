@@ -3,11 +3,113 @@
 {% extends "layout.html" %}
 {% block content %}
 <style>
-  /* reuse your blackjack styles or keep minimal */
-  .table-area { max-width:980px; margin:18px auto; background:#fff; padding:16px; border-radius:8px; }
-  .hand { text-align:center; margin-bottom:12px; }
+  body {
+    background-color: #FFDAB9;
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  header {
+    background: linear-gradient(90deg, #ffb07c, #ff7f50);
+    color: white;
+    text-align: center;
+    padding: 20px;
+    font-size: 28px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  }
+  h2 {
+    text-align: center;
+    color: #333;
+    margin-top: 24px;
+  }
+  .table-area {
+    max-width: 980px;
+    margin: 18px auto;
+    background: rgba(255,255,255,0.95);
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+  }
+  .meta {
+    text-align: center;
+    color: #444;
+    margin-bottom: 12px;
+    font-size: 18px;
+  }
+  .hands {
+    display: flex;
+    gap: 18px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .hand {
+    background: #fff;
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    min-width: 220px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.06);
+  }
+  .hand strong { display:block; margin-bottom:8px; color:#333; }
+  .controls {
+    text-align: center;
+    margin-top: 14px;
+  }
   .controls form { display:inline-block; margin:6px; }
-  .card-checkbox { display:inline-block; margin:6px; }
+  .controls button {
+    background: #ff7f50;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.12);
+  }
+  .controls button.secondary {
+    background: #fff;
+    color: #333;
+    border: 1px solid #eee;
+  }
+  .card { display:inline-block; margin:6px; vertical-align:top; }
+  .card img { width:120px; height:auto; border-radius:6px; box-shadow:0 4px 8px rgba(0,0,0,0.12); }
+  .messages { text-align:center; color:#555; margin-top:12px; }
+  .used-cards {
+    max-width: 980px;
+    margin: 12px auto;
+    background: rgba(255,255,255,0.95);
+    border-radius: 8px;
+    padding: 10px;
+    text-align: center;
+  }
+  .awaiting {
+    background:#fff7f0;
+    border:1px solid #ffd0b3;
+    padding:12px;
+    border-radius:8px;
+    display:inline-block;
+    margin-bottom:8px;
+    color:#873d00;
+    font-weight:600;
+  }
+  footer {
+    background: linear-gradient(90deg, #ff7f50, #ffb07c);
+    color: white;
+    text-align: center;
+    padding: 15px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    font-size: 20px;
+    box-shadow: 0 -4px 6px rgba(0,0,0,0.2);
+  }
+  @media (max-width:700px) {
+    .hand { min-width: 160px; }
+    .controls button { padding: 8px 10px; font-size:14px; }
+    .card img { width:80px; }
+  }
 </style>
 
 <header>
@@ -15,88 +117,181 @@
   <div class="casino-icons">♠ ♥ ♦ ♣</div>
 </header>
 
-<div class="table-area">
-  <h2>Five Card Draw Poker</h2>
+<h2>Texas-style Hold'em (simple) — vs 2 AI</h2>
 
-  <div><strong>Chips:</strong> {{ chips }}</div>
+<div class="table-area">
+  <div class="meta">
+    <strong>Chips:</strong> {{ chips }} &nbsp;|&nbsp;
+    <strong>Pot:</strong> {{ poker.pot or 0 }} &nbsp;|&nbsp;
+    <strong>Stage:</strong> {{ poker.stage }}
+    {% if poker.last_raise and poker.last_raise > 0 %} &nbsp;|&nbsp; <strong>Last Raise:</strong> {{ poker.last_raise }}{% endif %}
+  </div>
+
+  {# Odds display (safe bracket access) #}
+  {% if poker.show_odds and poker.odds %}
+    <div class="messages" style="background:#f6fffa; border:1px solid #d6f5e2; padding:10px; margin-top:8px;">
+      <strong>Estimated Odds ({{ poker.odds['trials'] }} sims):</strong>
+      Win: {{ (poker.odds['win'] * 100) | round(1) }}% &nbsp; Tie: {{ (poker.odds['tie'] * 100) | round(1) }}% &nbsp; Lose: {{ (poker.odds['loss'] * 100) | round(1) }}%
+    </div>
+  {% endif %}
+
+  {% if poker.result %}
+    <div class="messages"><h3>{{ poker.result }}</h3></div>
+  {% endif %}
+
+  {% if poker.stage == 'preflop' and not poker.player_hand %}
+    <div style="text-align:center; margin-bottom:12px;">
+      <form method="post" style="display:inline-block;">
+        <label style="margin-right:8px;">Place your bet:</label>
+        <input type="number" name="bet" min="0" max="{{ chips }}" required style="padding:8px; border-radius:6px; border:1px solid #ddd;">
+        <button type="submit" name="action" value="bet">Place Bet &amp; Deal</button>
+      </form>
+    </div>
+  {% else %}
+    <div class="hands">
+      <div class="hand">
+        <strong>Your Hole Cards {% if poker.player_hand %}(Stage: {{ poker.stage }}){% endif %}</strong>
+        <div>
+          {% if poker.player_hand %}
+            {% for c in poker.player_hand %}
+              <div class="card" title="{{ c[0] }} of {{ c[1] }}">
+                <img src="{{ url_for('static', filename='cards/' ~ c[2]) }}" alt="{{ c[0] }} of {{ c[1] }}">
+                <div style="margin-top:6px;">{{ c[0] }} of {{ c[1] }}</div>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div>No hole cards yet.</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="hand" style="min-width:360px;">
+        <strong>Community Cards</strong>
+        <div>
+          {% set revealed = 0 %}
+          {% if poker.stage in ['flop','turn','river','showdown'] %}
+            {% set revealed = 3 %}
+          {% endif %}
+          {% if poker.stage in ['turn','river','showdown'] %}
+            {% set revealed = revealed + 1 %}
+          {% endif %}
+          {% if poker.stage in ['river','showdown'] %}
+            {% set revealed = revealed + 1 %}
+          {% endif %}
+          {% if revealed == 0 %}
+            <div>No community cards yet.</div>
+          {% else %}
+            {% for i in range(revealed) %}
+              {% set c = poker.community[i] %}
+              <div class="card">
+                <img src="{{ url_for('static', filename='cards/' ~ c[2]) }}" alt="{{ c[0] }} of {{ c[1] }}">
+              </div>
+            {% endfor %}
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="hand">
+        <strong>Opponents</strong>
+        <div style="margin-top:6px;">
+          <div style="margin-bottom:10px;">
+            <strong>AI 1</strong>
+            <div>
+              {% if poker.stage == 'showdown' or poker.ai1_folded %}
+                {% for c in poker.ai1_hand %}
+                  <div class="card"><img src="{{ url_for('static', filename='cards/' ~ c[2]) }}" alt="{{ c[0] }} of {{ c[1] }}"></div>
+                {% endfor %}
+                {% if poker.ai1_folded %}<div style="color:#999; margin-top:6px;">(Folded)</div>{% endif %}
+              {% else %}
+                <div class="card"><img src="{{ url_for('static', filename='cards/back.svg') }}" alt="card back"></div>
+                <div class="card"><img src="{{ url_for('static', filename='cards/back.svg') }}" alt="card back"></div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div>
+            <strong>AI 2</strong>
+            <div>
+              {% if poker.stage == 'showdown' or poker.ai2_folded %}
+                {% for c in poker.ai2_hand %}
+                  <div class="card"><img src="{{ url_for('static', filename='cards/' ~ c[2]) }}" alt="{{ c[0] }} of {{ c[1] }}"></div>
+                {% endfor %}
+                {% if poker.ai2_folded %}<div style="color:#999; margin-top:6px;">(Folded)</div>{% endif %}
+              {% else %}
+                <div class="card"><img src="{{ url_for('static', filename='cards/back.svg') }}" alt="card back"></div>
+                <div class="card"><img src="{{ url_for('static', filename='cards/back.svg') }}" alt="card back"></div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {% if poker.show_used %}
+      <div class="used-cards" style="margin-top:18px;">
+        <strong>Used Cards (since last reshuffle)</strong>
+        <div style="margin-top:8px;">
+          {% if used_cards %}
+            {% for card in used_cards %}
+              <img src="{{ url_for('static', filename='cards/' ~ card[2]) }}" alt="{{ card[0] }} of {{ card[1] }}" width="48" style="margin:4px;">
+            {% endfor %}
+          {% else %}
+            <div>No cards used yet.</div>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+    <div class="controls">
+      {% if poker.awaiting_response %}
+        <div class="awaiting">Opponents raised — you must call at least {{ poker.to_call }} or enter a larger amount to re-raise.</div>
+        {% if not poker.round_over and poker.stage != 'showdown' %}
+          <form method="post" style="margin-top:8px;">
+            <label style="margin-right:8px;">Bet (min {{ poker.to_call }}):</label>
+            <input type="number" name="bet" min="{{ poker.to_call }}" max="{{ chips }}" required style="padding:8px; border-radius:6px; border:1px solid #ddd;">
+            <button type="submit" name="action" value="bet">Call / Raise</button>
+          </form>
+        {% endif %}
+      {% else %}
+        {% if not poker.round_over and poker.stage in ['flop','turn','river'] %}
+          <form method="post"><label style="margin-right:8px;">Bet (0 to check):</label><input type="number" name="bet" min="0" max="{{ chips }}" required style="padding:8px; border-radius:6px; border:1px solid #ddd;"><button type="submit" name="action" value="bet">Bet / Check</button></form>
+        {% endif %}
+        {% if poker.stage == 'river' and not poker.round_over %}
+          <form method="post"><button type="submit" name="action" value="showdown">Showdown</button></form>
+        {% endif %}
+        {% if poker.stage == 'preflop' and poker.player_hand and not poker.round_over %}
+          <form method="post"><label style="margin-right:8px;">Bet (0 to check):</label><input type="number" name="bet" min="0" max="{{ chips }}" required style="padding:8px; border-radius:6px; border:1px solid #ddd;"><button type="submit" name="action" value="bet">Bet</button></form>
+        {% endif %}
+        {% if poker.player_hand and poker.stage != 'showdown' and not poker.round_over %}
+          <form method="post" style="display:inline; margin-left:8px;"><button type="submit" name="action" value="fold">Fold</button></form>
+        {% endif %}
+      {% endif %}
+
+      {# Always-show controls: Show Odds and Reset Poker #}
+      <div style="margin-top:8px;">
+        {% if poker.player_hand and not poker.round_over %}
+          <form method="post" style="display:inline; margin-left:8px;">
+            <button type="submit" name="action" value="odds" class="secondary">Show Odds</button>
+          </form>
+        {% endif %}
+        <form method="post" style="display:inline; margin-left:8px;">
+          <button type="submit" name="action" value="reset_poker" class="secondary">Reset Poker</button>
+        </form>
+      </div>
+    </div>
+  {% endif %}
 
   {% if messages %}
-    <div>
-      {% for m in messages %}<p>{{ m }}</p>{% endfor %}
-    </div>
-  {% endif %}
-
-  {% set phase = poker.phase %}
-
-  {% if phase == 'bet' %}
-    <form method="POST">
-      <label>Place your bet:</label>
-      <input type="number" name="bet" min="1" max="{{ chips }}" required>
-      <button type="submit" name="action" value="bet">Deal</button>
-    </form>
-  {% else %}
-    <div class="hand">
-      <strong>Your Hand</strong>
-      <div>
-        {% for card in poker.player_hand %}
-          <img src="{{ url_for('static', filename='cards/' ~ card[2]) }}" width="80" alt="{{ card[0] }} of {{ card[1] }}">
-        {% endfor %}
-      </div>
-    </div>
-
-    <div class="hand">
-      <strong>Dealer Hand</strong>
-      <div>
-        {% if phase == 'draw' %}
-          {% for card in poker.dealer_hand %}
-            <img src="{{ url_for('static', filename='cards/back.svg') }}" width="80">
-          {% endfor %}
-        {% else %}
-          {% for card in poker.dealer_hand %}
-            <img src="{{ url_for('static', filename='cards/' ~ card[2]) }}" width="80">
-          {% endfor %}
-        {% endif %}
-      </div>
-    </div>
-
-    {% if phase == 'draw' %}
-      <form method="POST">
-        <div>Select cards to discard</div>
-        <div>
-          {% for i in range(0,5) %}
-            <label class="card-checkbox">
-              <input type="checkbox" name="discard" value="{{ i }}"> discard
-            </label>
-          {% endfor %}
-        </div>
-        <button type="submit" name="action" value="draw">Draw</button>
-        <button type="submit" name="action" value="fold">Fold</button>
-      </form>
-    {% elif phase == 'showdown' %}
-      <form method="POST">
-        <button type="submit" name="action" value="showdown">Showdown</button>
-        <button type="submit" name="action" value="fold">Fold</button>
-      </form>
-    {% elif phase == 'round_over' %}
-      <div><strong>Result:</strong> {{ poker.result }}</div>
-      <form method="POST">
-        <button type="submit" name="action" value="reset_poker">Play Again</button>
-      </form>
-    {% endif %}
-  {% endif %}
-
-  {% if show_used %}
-    <div style="margin-top:12px;">
-      <strong>Used Cards</strong>
-      <div>
-        {% for card in used_cards %}
-          <img src="{{ url_for('static', filename='cards/' ~ card[2]) }}" width="48" style="margin:4px;">
-        {% endfor %}
-      </div>
+    <div class="messages">
+      {% for m in messages %}
+        <p>{{ m }}</p>
+      {% endfor %}
     </div>
   {% endif %}
 </div>
 
-<footer>Good luck getting out of debt!</footer>
+<footer>
+  Good luck getting out of debt!
+</footer>
 {% endblock %}
 </html>
