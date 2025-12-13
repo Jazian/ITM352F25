@@ -91,6 +91,8 @@ def blackjack():
     if 'show_used' not in session: # Whether to show used cards
         session['show_used'] = False
 
+    # Ensure a deck exists without wiping used_cards so cheat view can show all draws since last reshuffle
+    ensure_deck()
 
     player_hand = session.get('player_hand', [])
     dealer_hand = session.get('dealer_hand', [])
@@ -958,8 +960,8 @@ def poker():
                                        poker=poker_state,
                                        messages=messages)
             
-            if bet_amount < 0:
-                messages.append("Bet must be 0 or positive.")
+            if bet_amount <= 0:
+                messages.append("Bet must be greater than 0.")
             elif bet_amount > session.get('chips', 0):
                 messages.append("Bet exceeds your chips.")
             else:
@@ -1215,6 +1217,9 @@ def poker():
 def reset_game(game):
     # preserve chips by default
     if game == 'blackjack':
+        # Fully reset blackjack state and give the player a fresh bankroll
+        if session.get('chips', 0) <= 0:
+            session['chips'] = 1000
         session.pop('player_hand', None)
         session.pop('dealer_hand', None)
         session['bet'] = 0
@@ -1223,7 +1228,8 @@ def reset_game(game):
         session['current_hand'] = 'player'
         session.pop('hand_done', None)
         session['round_over'] = False
-        # keep chips as-is
+        session['show_used'] = False
+        # keep deck/used_cards so cheat view shows all draws since last reshuffle
         return redirect(url_for('blackjack'))
 
     elif game == 'poker':
